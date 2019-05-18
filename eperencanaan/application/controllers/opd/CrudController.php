@@ -26,6 +26,7 @@ class CrudController extends CI_Controller {
         $status = false;
         $linkSavePDF = '';
         $nameFile = '';
+        $pageStatus = NULL;
 
         $session = $this->myconfig->getSession($this->input->post('session'), $this->level,true,  $this->akun);
         if(@$session['status']){
@@ -390,6 +391,7 @@ class CrudController extends CI_Controller {
                 // print_r($post);
                 $linkSavePDF = 'opd/rka-pra';
                 $nameFile = 'rka';
+                $pageStatus = 'miring';
                 
                 $data = $this->PraRkaModel->getAll($page, $search, $post);
                 $dataAll = array();
@@ -517,7 +519,7 @@ class CrudController extends CI_Controller {
         
         if($save == 'pdf'){
             $this->load->library('M_pdf');
-            $this->m_pdf->getPdf($nameFile, $linkSavePDF, $kirim);
+            $this->m_pdf->getPdf($nameFile, $linkSavePDF, $kirim, $pageStatus);
         }else if($save == 'excel'){
             $this->exportExcel($nameFile, $kirim['data']);
         }else{
