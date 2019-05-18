@@ -1,7 +1,7 @@
 {
-    "apiRoot": "../../", 
-    "apiMusrenbang": "../../../perencanaan/",
-    "apiSatuanHarga": "../../../satuanharga/",
+    "apiRoot": "http://localhost/eperencanaan/eperencanaan/", 
+    "apiMusrenbang": "http://localhost/eperencanaan/perencanaan/",
+    "apiSatuanHarga": "http://localhost/eperencanaan/satuanharga/",
     "index": 1
     
 }
