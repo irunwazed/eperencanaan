@@ -6,7 +6,7 @@ class OpdPaguModel extends CI_Model
     public function __construct()
     {
         parent::__construct();
-        $this->jumlah = 20;
+        $this->jumlah = 200;
         $this->table = 'ref_opd_pagu';
     }
 
@@ -95,6 +95,10 @@ class OpdPaguModel extends CI_Model
         if($opd > 0){
             // print_r($post);
             $result = $this->db->insert($this->table, array(
+                // 'Kd_Urusan' => $post['Kd_Urusan'], 
+                // 'Kd_Bidang' => $post['Kd_Bidang'], 
+                // 'Kd_Unit' => $post['Kd_Unit'], 
+                // 'Kd_Sub' => $post['Kd_Sub'], 
                 'rpjmd_id' => $post['rpjmd'],
             ));
         }
@@ -103,14 +107,12 @@ class OpdPaguModel extends CI_Model
     }
 
     public function delete($post){
-
+        $result = false;
         $visi = $this->cekInput($post);
         if($visi > 0){
             $id = $post['opd_pagu_id'];;
             $this->db->where('opd_pagu_id', $id);
             $result = $this->db->delete($this->table);
-        }else{
-            $result = false;
         }
         // $result = false;
         return $result;

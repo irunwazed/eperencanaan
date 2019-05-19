@@ -231,8 +231,6 @@ class CrudController extends CI_Controller {
                 $data = $dataAll;
             }
 
-            
-
             if($name == "opd_rkpd_awal"){
                 $this->load->model('opd/RkpdAwalModel');
                 $data = $this->RkpdAwalModel->getAll($page, $search, $post);

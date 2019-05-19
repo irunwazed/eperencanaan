@@ -239,7 +239,6 @@ class RkpdAwalCreate extends Component {
     let data = new FormData();
     data.append('session', localStorage.getItem('codexv-session'));
     data.append('rpjmd', localStorage.getItem('codexv-rpjmd'));
-    
     data.append('perumusan_program_id', this.state.dataPilih.perumusan_program_id);
     data.append('target'+this.state.dataTambah.tahun+'_sumber_dana', this.state.dataPilih['target'+this.state.dataTambah.tahun+'_sumber_dana']);
     data.append('target'+this.state.dataTambah.tahun+'_catatan', this.state.dataPilih['target'+this.state.dataTambah.tahun+'_catatan']);

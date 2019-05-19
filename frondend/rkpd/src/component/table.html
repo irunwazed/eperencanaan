@@ -1,0 +1,323 @@
+
+<script>
+  ///////////////////////////////////////////////// SETTING ///////////////////////////////////////////  
+    var link = 'opd/menyusun/pagu';
+    var dataAll;
+    var dataPilih = {};
+
+    var dataTable = {
+        judul: "PAGU OPD",
+    };
+    var dataForm = [];
+    
+    $("#component").show();
+    $(document).ready( function() {
+        $("#judul-modal").text(dataTable.judul);  
+        $("#judul-page").text(dataTable.judul);  
+    });
+
+
+
+    // buat tag form
+    setForm();
+    function setForm(){
+        
+        dataForm = [
+            { status:true, tag: 'hidden', name: "opd_pagu_id", value: ""}, // sebagai id, harus duluan
+            { status:false, tag:'select', name:"Nm_Sub_Unit", judul: "OPD", type: "", value: "" },
+        ]
+        for(let i = 1; i<=5; i++){
+            dataForm.push({ status:true, tag: 'input', name:"tahun"+i+"_sebelum", judul: "Pagu Tahun Ke-"+i+"", type: 'number', value: ""});
+            dataForm.push({ status:true, tag: 'input', name:"tahun"+i+"_sesudah", judul: "Pagu Tahun Ke-"+i+" Perubahan", type: 'number', value: ""});
+        }
+
+        dataForm.forEach(element => {
+            $("#modal-body").append(form(element));
+        });
+    }
+    createHeadTable();
+    function createHeadTable(){
+        headTable = '<tr>'+
+                        '<th rowSpan="3">Nama OPD</th>'+
+                        '<th colSpan="2">Tahun 1</th>'+
+                        '<th colSpan="2">Tahun 2</th>'+
+                        '<th colSpan="2">Tahun 3</th>'+
+                        '<th colSpan="2">Tahun 4</th>'+
+                        '<th colSpan="2">Tahun 5</th>'+
+                        '<th rowSpan="3">Aksi</th>'+
+                    '</tr>'+
+                    '<tr>'+
+                        '<th colSpan="2">Pagu</th>'+
+                        '<th colSpan="2">Pagu</th>'+
+                        '<th colSpan="2">Pagu</th>'+
+                        '<th colSpan="2">Pagu</th>'+
+                        '<th colSpan="2">Pagu</th>'+
+                    '</tr>'+
+                    '<tr>'+
+                        '<th>Sebelum Perubahan</th>'+
+                        '<th>Setelah Perubahan</th>'+
+                        '<th>Sebelum Perubahan</th>'+
+                        '<th>Setelah Perubahan</th>'+
+                        '<th>Sebelum Perubahan</th>'+
+                        '<th>Setelah Perubahan</th>'+
+                        '<th>Sebelum Perubahan</th>'+
+                        '<th>Setelah Perubahan</th>'+
+                        '<th>Sebelum Perubahan</th>'+
+                        '<th>Setelah Perubahan</th>'+
+                    '</tr>'+
+                    '<tr>'+
+                        '<th>(1)</th>'+
+                        '<th>(2)</th>'+
+                        '<th>(3)</th>'+
+                        '<th>(4)</th>'+
+                        '<th>(5)</th>'+
+                        '<th>(6)</th>'+
+                        '<th>(7)</th>'+
+                        '<th>(8)</th>'+
+                        '<th>(9)</th>'+
+                        '<th>(10)</th>'+
+                        '<th>(11)</th>'+
+                        '<th>(12)</th>'+
+                    '</tr>';
+         $("#headTable").append(headTable);   
+    }
+    
+    // load data
+    getData();
+    function setDataAll(respon){
+        dataAll = respon.data;
+        inputData(respon.data);
+        inputOpd(respon.dataAllOpd);
+    }
+
+    // tambah data di select option
+    function inputOpd(data){
+        data.forEach(element => {
+            let row = '<option value="'+element.Kd_Urusan+'-'+element.Kd_Bidang+'-'+element.Kd_Unit+'-'+element.Kd_Sub+'">'+element.Nm_Sub_Unit+'</option>';
+            $("select[name^='Nm_Sub_Unit']").append(row);
+        });
+    }
+
+
+    function setData(id = null){
+        
+        if(id == null){
+            let kodeOpd = $("select[name^='Nm_Sub_Unit']").val();
+            kode = kodeOpd.split("-");
+            if(kode.length != 4){
+                console.log("sdf");
+            }
+
+            //tetap
+            dataPilih.session = getCookie('codexv-session');
+            dataPilih.rpjmd = getCookie('codexv-rpjmd');
+
+            //manual isi karena berstatus false
+            dataPilih.Kd_Urusan =kode[0];
+            dataPilih.Kd_Bidang =kode[1];
+            dataPilih.Kd_Unit =kode[2];
+            dataPilih.Kd_Sub =kode[3];
+
+            //otomatis mengisi
+            dataForm.forEach(element =>{
+                if(element.status)
+                    dataPilih[element.name] = $("input[name^='"+element.name+"']").val();
+            });
+            
+            
+        }else{
+            getDataId(id);
+            // console.log(dataPilih);
+            //manual isi karena berstatus false
+            $("select[name^='Nm_Sub_Unit']").val(dataPilih.Kd_Urusan+'-'+dataPilih.Kd_Bidang+'-'+dataPilih.Kd_Unit+'-'+dataPilih.Kd_Sub);
+            
+            //otomatis mengisi
+            dataForm.forEach(element =>{
+                if(element.status)
+                    $("input[name^='"+element.name+"']").val(dataPilih[element.name]);
+            });
+        }
+        
+    }
+///////////////////////////////////////////////// OTOMATIS ///////////////////////////////////////////
+
+    // tambah data di table
+    function inputData(data){
+        $("#dataTable").empty();
+        data.forEach(element => {
+            let row = "<tr id='row"+element[dataForm[0].name]+"'>";
+            dataForm.forEach(form =>{
+                if(form.tag != 'hidden')
+                    row += "<td>"+element[form.name]+"</td>";
+            });
+            row += "<td>"+
+                        '<button class="btn btn-primary waves-effect m-r-20" data-id="'+element[dataForm[0].name]+'" onclick="editRow(this)">Edit</button>'+
+                        '<button class="btn btn-danger waves-effect m-r-20" data-id="'+element[dataForm[0].name]+'" onclick="hapusModal(this)">Hapus</button>'+
+                    "</td>"+
+                "</tr>";
+            $("#dataTable").append(row);
+        });
+    }
+
+    // ambil satu data dari dataAll
+    function getDataId(id){
+        dataAll.forEach(element =>{
+            if(element[dataForm[0].name] == id){
+                dataPilih = element;
+            }
+        });
+    }
+
+    // tambah proses
+    function tambahRow(){
+        url = config.apiRoot+link+'/create';
+        setData();
+        $.when(sendAjax(url, dataPilih)).done(function(a1){
+            $.when(getData()).done(function(a1){
+                rowpos = $('#table tr:last').position();
+                $("html, body").animate({ scrollTop: rowpos.top });
+            });
+        });
+    }
+    // . tambah proses
+
+    // edit proses
+    function editRow(obj){
+        let id = $(obj).attr('data-id');
+        setData(id);
+        $("input[name^='"+dataForm[0].name+"']").val(id);
+        $('#modal').modal('toggle');
+    }
+
+    $('#form').submit(function( event ) {
+        event.preventDefault();
+        setData();
+        url = config.apiRoot+link+'/update';
+        $.when(sendAjax(url, dataPilih)).done(function(a1){
+            $('#modal').modal('toggle');
+            $.when(getData()).done(function(a1){
+                rowpos = $('#row'+dataPilih[dataForm[0].name]).position();
+                $("html, body").animate({ scrollTop: rowpos.top });
+            });
+        });
+    });
+    // . edit proses
+
+    // hapus proses
+    function hapusModal(obj){
+        $('#mdModal').modal('toggle');
+        id = $(obj).attr('data-id');
+        $("#hapus-data").attr('data-id', id);
+    }
+
+    function hapusRow(obj){
+        url = config.apiRoot+link+'/delete';
+        id = $(obj).attr('data-id');
+
+        dataPilih.session = getCookie('codexv-session');
+        dataPilih.rpjmd = getCookie('codexv-rpjmd');
+        dataPilih[dataForm[0].name] = id;
+
+        $.when(sendAjax(url, dataPilih)).done(function(a1){
+            $.when(getData()).done(function(a1){
+                $('#mdModal').modal('hide');
+            });
+        });
+    }
+    // . hapus proses
+
+    function getData(page = 1){
+        var url = config.apiRoot+link+'/page-'+page;
+
+        loading();
+		return $.ajax({
+			type: "POST",
+			url: url,
+			dataType: "JSON",
+			data: {
+                session: getCookie('codexv-session'),
+                rpjmd: getCookie('codexv-rpjmd'), 
+			},
+			success: function(respon)
+			{   
+                setDataAll(respon);
+                console.log(respon);
+                loading(false);
+			},
+			error:function(error){
+                console.log(error);
+                loading(false);
+			}
+		});
+    }
+
+    function sendAjax(url, dataKirim){
+        loading();
+        return $.ajax({
+			type: "POST",
+			url: url,
+			dataType: "JSON",
+			data: dataKirim, 
+			success: function(respon)
+			{   
+                if(respon.status){
+                    message(respon.pesan);
+                }
+                console.log(respon);
+                loading(false);
+			},
+			error:function(error){
+                console.log(error);
+                loading(false);
+			}
+		});
+    }
+
+    loading(false);
+    function loading(loading = true){
+        if(loading){
+            $('#loading').show();
+            $('#table').hide();
+        }else{
+            $('#loading').hide();
+            $('#table').show();
+        }
+        
+    }
+
+    function form(data = null){
+        
+        let tag = {};
+
+        tag['hidden'] = '<input type="hidden" name="'+data.name+'" value="'+data.value+'">';
+        tag['input'] = '<div class="row clearfix">'+
+                        '<div class="col-lg-2 col-md-2 col-sm-4 col-xs-5 form-control-label">'+
+                            '<label for="email_address_2">'+data.judul+'</label>'+
+                        '</div>'+
+                        '<div class="col-lg-10 col-md-10 col-sm-8 col-xs-7">'+
+                            '<div class="form-group">'+
+                                '<div class="form-line">'+
+                                    '<input type="'+data.type+'" class="form-control" value="'+data.value+'" placeholder="Masukkan '+data.judul+'" name="'+data.name+'"  required autofocus>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                    '</div>';
+        tag['select'] = '<div class="row clearfix">'+
+                            '<div class="col-lg-2 col-md-2 col-sm-4 col-xs-5 form-control-label">'+
+                                '<label for="email_address_2">'+data.judul+'</label>'+
+                            '</div>'+
+                            '<div class="col-lg-10 col-md-10 col-sm-8 col-xs-7">'+
+                                '<div class="form-group">'+
+                                    '<div class="form-line">'+
+                                        '<select class="form-control show-tick" name="'+data.name+'" value="'+data.value+'" required autofocus>'+
+                                            '<option value="">-- Pilih '+data.judul+' --</option>'+
+                                        '</select>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>';
+
+        return tag[data.tag];
+    }
+
+</script>
