@@ -27,6 +27,7 @@ class CrudController extends CI_Controller {
         $linkSavePDF = '';
         $nameFile = '';
         $pageStatus = NULL;
+        $dataType = '';
 
         $session = $this->myconfig->getSession($this->input->post('session'), $this->level,true,  $this->akun);
         if(@$session['status']){
@@ -172,9 +173,13 @@ class CrudController extends CI_Controller {
                 
                 if($name == "opd_renstra_opd"){
                     $post['name'] = 'opd';
+                    $linkSavePDF = 'opd/renstra-opd';
+                    $nameFile = 'renstra-opd';
+                }else if($name == "opd_renstra_kab"){
+                    $linkSavePDF = 'opd/renstra-kab';
+                    $nameFile = 'renstra-kab';
                 }
-                $linkSavePDF = 'opd/renstra-opd';
-                $nameFile = 'renstra-opd';
+                
 
                 $dataTambah = $this->DataModel->getSasaran($post);
 
@@ -237,6 +242,11 @@ class CrudController extends CI_Controller {
                 $bidang = 0;
                 $program = 0;
                 $tahun = $this->tahun;
+                
+                $linkSavePDF = 'opd/rkpd-awal';
+                $nameFile = 'RKPD';
+                $dataType = 'rkpd-awal';
+
                 if(@$data[0]['rpjmd_tahun']){
                     $tahun = $tahun-$data[0]['rpjmd_tahun']+1;
                 }else{
@@ -288,7 +298,7 @@ class CrudController extends CI_Controller {
                 $data = $dataAll;
             }
             
-            if($name == "opd_rkpd_verifikasi" || $name == "opd_renja_awal" || $name == "opd_rkpd_perubahan" || $name == "opd_renja_perubahan"){
+            if($name == "opd_rkpd_verifikasi" || $name == "opd_renja_awal" || $name == "opd_rkpd_perubahan" || $name == "opd_renja_perubahan" || $name == "opd_rkpd_final"){
                 $this->load->model('opd/RkpdVerifikasiModel');
                 if($name == "opd_renja_awal"){
                     $post['name'] = 'opd';
@@ -296,8 +306,17 @@ class CrudController extends CI_Controller {
                 if($name == "opd_rkpd_perubahan" || $name == "opd_renja_perubahan"){
                     $post['jenis'] = 'rkpd_perubahan';
                 }
-                $linkSavePDF = 'opd/rkpd';
+                
                 $nameFile = 'RKPD';
+
+                if($name == "opd_rkpd_final"){
+                    $dataType = 'rkpd-final';
+                    $linkSavePDF = 'opd/rkpd-final';
+                }else if($name == "opd_rkpd_verifikasi"){
+                    $dataType = 'rkpd-verifikasi';
+                    $linkSavePDF = 'opd/rkpd-verifikasi';
+                }
+                
                 $data = $this->RkpdVerifikasiModel->getAll($page, $search, $post);
                 $dataAll = array();
                 $no = 0;
@@ -408,6 +427,7 @@ class CrudController extends CI_Controller {
                     
                     $kirim['dataOneOpd'] = @$this->DataModel->selectOneOpd($data[0]['Kd_Urusan'], $data[0]['Kd_Bidang'], $data[0]['Kd_Unit'], $data[0]['Kd_Sub']);
                     $kirim['dataOneKegiatan'] = @$this->DataModel->selectOneKegiatan($data[0]['Kd_Urusan'], $data[0]['Kd_Bidang'], $data[0]['Kd_Prog'], $data[0]['Kd_Keg']);
+                    // $kirim['data'][]
                 }else{
                     $tahun=0;
                 }
@@ -521,7 +541,9 @@ class CrudController extends CI_Controller {
             $this->load->library('M_pdf');
             $this->m_pdf->getPdf($nameFile, $linkSavePDF, $kirim, $pageStatus);
         }else if($save == 'excel'){
-            $this->exportExcel($nameFile, $kirim['data']);
+            if($kirim['data'])
+            
+            $this->exportExcel($dataType, $nameFile, $kirim['data'], $kirim);
         }else{
             echo json_encode($kirim);
         }
@@ -824,7 +846,7 @@ class CrudController extends CI_Controller {
 		echo json_encode($kirim);
     }
 
-    function exportExcel($name='data', $data)
+    function exportExcel($dataType = '', $name='data', $data, $dataAll = [])
     {
         $this->load->library("excel");
 
@@ -1030,7 +1052,8 @@ class CrudController extends CI_Controller {
             $object = new PHPExcel();
     
             $object->setActiveSheetIndex(0);
-    
+            
+            $tahun_rpjmd = $dataAll['tahun_rpjmd'];
             $table_columns = array(
                 array(
                     "Tujuan",
@@ -1067,15 +1090,15 @@ class CrudController extends CI_Controller {
                     "Program",
                     "Kegiatan",
                     "",
-                    "2019",
+                    "".$tahun_rpjmd."",
                     "",
-                    "2020",
+                    "".($tahun_rpjmd+1)."",
                     "",
-                    "2021",
+                    "".($tahun_rpjmd+2)."",
                     "",
-                    "2022",
+                    "".($tahun_rpjmd+3)."",
                     "",
-                    "2023",
+                    "".($tahun_rpjmd+4)."",
                     "",
                     "Kondisi Kinerja Akhir Periode",
                     "",
@@ -1172,75 +1195,114 @@ class CrudController extends CI_Controller {
     
             $object->setActiveSheetIndex(0);
     
-            $table_columns = array(
-                array(
-                    "Kode",
-                    "",
-                    "",
-                    "",
-                    "Urusan / Bidang / Program / Kegiatan",
-                    "",
-                    "",
-                    "",
-                    "Indikator Kinerka (Outcome)",
-                    "",
-                    "Tahun",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "Tahun",
-                    "",
-                    "",
-                    "OPD",
-                ),
-                array(
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "Program",
-                    "Kegiatan",
-                    "Lokasi",
-                    "Target capaian kinerja",
-                    "",
-                    "Kebutuhan Dana/ pagu indikatif (Rp)",
-                    "Sumber Dana",
-                    "Catatan Penting",
-                    "Target capaian kinerja",
-                    "",
-                    "Kebutuhan Dana/ pagu indikatif (Rp)",
-                ),
-                array(
-                    "(1)",
-                    "",
-                    "",
-                    "",
-                    "(2)",
-                    "",
-                    "",
-                    "",
-                    "(3)",
-                    "",
-                    "(4)",
-                    "(5)",
-                    "",
-                    "(6)",
-                    "(7)",
-                    "(8)",
-                    "(9)",
-                    "",
-                    "(10)",
-                    "(11)",
+            $table_columns = '';
+
+            if($dataType == 'rkpd-awal'){
+                $table_columns = array(
+                    array(
+                        "Kode",
+                        "",
+                        "",
+                        "",
+                        "Urusan / Bidang / Program / Kegiatan",
+                        "Indikator Kinerka (Outcome)",
+                        "",
+                        "Tahun",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "Catatan Penting",
+                        "Tahun",
+                        "",
+                        "",
+                    ),
+                    array(
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "Program",
+                        "Kegiatan",
+                        "Lokasi",
+                        "Target Capaian Kerja",
+                        "",
+                        "Kebutuhan Dana/ pagu indikatif (Rp)",
+                        "Sumber Dana",
+                        "",
+                        "Target Capaian Kerja",
+                        "",
+                        "Kebutuhan Dana/ pagu indikatif (Rp)",
+                    )
+        
+                );
+
+
+            }else{
+                $table_columns = array(
+                    array(
+                        "Kode",
+                        "",
+                        "",
+                        "",
+                        "Urusan / Bidang / Program / Kegiatan",
+                        "",
+                        "",
+                        "",
+                        "Indikator Kinerka (Outcome)",
+                        "",
+                        "Tahun",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "Catatan Penting",
+                        "Tahun",
+                        "",
+                        "",
+                        "OPD",
+                    ),
+                    array(
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "Program",
+                        "Kegiatan",
+                        "Lokasi",
+                        "Target capaian kinerja",
+                        "",
+                        "Kebutuhan Dana/ pagu indikatif (Rp)",
+                        "Sumber Dana",
+                        "",
+                        "Target capaian kinerja",
+                        "",
+                        "Kebutuhan Dana/ pagu indikatif (Rp)",
+                    )
+        
+                );
+            }
+            
+            // mengatur variable align center
+            $styleHorizontal = array(
+                'alignment' => array(
+                    'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
                 )
-    
             );
-    
+            $styleVertical = array(
+                'alignment' => array(
+                    'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+                )
+            );
+            // end mengatur variable align center
+
+            $cells = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
+
             $column = 0;
             $row = 1;
             foreach($table_columns as $field)
@@ -1257,41 +1319,247 @@ class CrudController extends CI_Controller {
             $nomor = 1;
         // print_r($data);
             $tahun = 1+$this->tahun-@$data[0]['rpjmd_tahun'];
-            foreach($data as $row)
-            {
-                if($row['Kd_Keg'] == null || $row['Kd_Keg'] == ''){
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, $row['Kd_Urusan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, $row['Kd_Bidang']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['Kd_Prog']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Keg']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(4, $excel_row, $row['Nm_Urusan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(5, $excel_row, $row['Nm_Bidang']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(6, $excel_row, $row['Ket_Program']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(7, $excel_row, $row['Ket_Kegiatan']);
-                }else{
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, $row['Kd_Urusan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, $row['Kd_Bidang']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['Kd_Prog']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Keg']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(4, $excel_row, $row['Nm_Urusan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(5, $excel_row, $row['Nm_Bidang']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(6, $excel_row, $row['Ket_Program']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(7, $excel_row, $row['Ket_Kegiatan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(8, $excel_row, $row['outcome']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(9, $excel_row, $row['outcome_kegiatan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(10, $excel_row, $row['kondisi_awal']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(11, $excel_row, $row['target'.$tahun.'_tahun']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(12, $excel_row, $row['target'.$tahun.'_satuan_nama']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(13, $excel_row, $row['target'.$tahun.'_harga']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(14, $excel_row, $row['target'.$tahun.'_sumber_dana']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(15, $excel_row, $row['target'.$tahun.'_catatan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(16, $excel_row, $row['target'.($tahun+1).'_tahun']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(17, $excel_row, $row['target'.($tahun+1).'_satuan_nama']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(18, $excel_row, $row['target'.($tahun+1).'_harga']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(19, $excel_row, $row['Nm_Sub_Unit']);
+
+            if($dataType == 'rkpd-final' || $dataType == 'rkpd-verifikasi'){
+                foreach($data as $row)
+                {
+                    if($row['Kd_Keg'] == null || $row['Kd_Keg'] == ''){
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, $row['Kd_Urusan']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, $row['Kd_Bidang']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['Kd_Prog']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Keg']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(4, $excel_row, $row['Nm_Urusan']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(5, $excel_row, $row['Nm_Bidang']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(6, $excel_row, $row['Ket_Program']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(7, $excel_row, $row['Ket_Kegiatan']);
+                    }else{
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, $row['Kd_Urusan']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, $row['Kd_Bidang']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['Kd_Prog']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Keg']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(4, $excel_row, $row['Nm_Urusan']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(5, $excel_row, $row['Nm_Bidang']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(6, $excel_row, $row['Ket_Program']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(7, $excel_row, $row['Ket_Kegiatan']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(8, $excel_row, $row['outcome']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(9, $excel_row, $row['outcome_kegiatan']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(10, $excel_row, $row['kondisi_awal']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(11, $excel_row, $row['target'.$tahun.'_tahun']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(12, $excel_row, $row['target'.$tahun.'_satuan_nama']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(13, $excel_row, $row['target'.$tahun.'_harga']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(14, $excel_row, $row['target'.$tahun.'_sumber_dana']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(15, $excel_row, $row['target'.$tahun.'_catatan']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(16, $excel_row, $row['target'.($tahun+1).'_tahun']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(17, $excel_row, $row['target'.($tahun+1).'_satuan_nama']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(18, $excel_row, $row['target'.($tahun+1).'_harga']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(19, $excel_row, $row['Nm_Sub_Unit']);
+                    }
+                    $excel_row++;
                 }
-                $excel_row++;
+
+                // memberi border Atas
+                $borderArray = array(
+                    'borders' => array(
+                        'allborders' => array(
+                            'style' => PHPExcel_Style_Border::BORDER_THIN
+                        )
+                    )
+                );
+
+                $object->getActiveSheet()->getStyle("A1:D2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("E1:H2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("I1:J1")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("K1:O1")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("P1:P2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("Q1:S1")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("T1:T2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("L2:M2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("Q2:R2")->applyFromArray($borderArray);
+
+                $object->getActiveSheet()->getStyle("I2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("J2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("K2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("N2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("O2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("S2")->applyFromArray($borderArray);
+                // end memberi border Atas
+
+                // merge cell
+                $object->getActiveSheet()->mergeCells("A1:D2");
+                $object->getActiveSheet()->mergeCells("E1:H2");
+                $object->getActiveSheet()->mergeCells("I1:J1");
+                $object->getActiveSheet()->mergeCells("K1:O1");
+                $object->getActiveSheet()->mergeCells("P1:P2");
+                $object->getActiveSheet()->mergeCells("Q1:S1");
+                $object->getActiveSheet()->mergeCells("T1:T2");
+                $object->getActiveSheet()->mergeCells("L2:M2");
+                $object->getActiveSheet()->mergeCells("Q2:R2");
+                // end merge cell    
+
+                $columnCell = 0;
+                while($columnCell <= $column){
+                    $dataCell = 0;
+                    while($dataCell <= $excel_row){
+                        // memberi border bawah
+                        $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->applyFromArray(
+                        array(
+                            'borders' => array(
+                                'allborders' => array(
+                                    'style' => PHPExcel_Style_Border::BORDER_THIN
+                                    )
+                            )
+                        )
+                        );
+                        // end memberi border bawah
+
+                        // menset align center
+                        $object->getActiveSheet()->getStyle("A".$dataCell)->applyFromArray($styleHorizontal);
+                        $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->applyFromArray($styleVertical);
+                        // end menset align center
+
+                        // Text wrapping
+                        $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->getAlignment()->setWrapText(true);
+                        // end text wrapping
+
+                        $dataCell++;
+                    }
+
+                    // mengatur auto menyesuaikan lebar
+                    $object->getActiveSheet()->getColumnDimension($cells[$columnCell])->setAutoSize(true);
+                    // $object->getActiveSheet()->getColumnDimension("A")->setWidth(10);
+                    // end auto menyesuaikan lebar
+
+                    // menebalkan font
+                    $object->getActiveSheet()->getStyle($cells[$columnCell]."1")->getFont()->setBold(true);
+                    $object->getActiveSheet()->getStyle($cells[$columnCell]."2")->getFont()->setBold(true);
+                    // end menebalkan font
+
+                    // menset align center
+                    $object->getActiveSheet()->getStyle($cells[$columnCell]."1")->applyFromArray($styleHorizontal);
+                    $object->getActiveSheet()->getStyle($cells[$columnCell]."1")->applyFromArray($styleVertical);
+                    $object->getActiveSheet()->getStyle($cells[$columnCell]."2")->applyFromArray($styleHorizontal);
+                    $object->getActiveSheet()->getStyle($cells[$columnCell]."2")->applyFromArray($styleVertical);
+                    // end menset align center
+
+                    $columnCell++;
+                }
+            }else if($dataType == 'rkpd-awal'){
+                foreach($data as $row)
+                {
+                    if($row['Kd_Keg'] == null || $row['Kd_Keg'] == '' || $row['Kd_Keg'] == 0){
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, $row['Kd_Urusan']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, $row['Kd_Bidang']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['Kd_Prog']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Keg']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(4, $excel_row, $row['nama_jenis']);
+                    }else{
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, $row['Kd_Urusan']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, $row['Kd_Bidang']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['Kd_Prog']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Keg']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(4, $excel_row, $row['nama_jenis']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(5, $excel_row, $row['outcome']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(6, $excel_row, $row['outcome_kegiatan']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(7, $excel_row, $row['lokasi']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(8, $excel_row, $row['target'.$tahun.'_tahun']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(9, $excel_row, $row['target'.$tahun.'_satuan_nama']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(10, $excel_row, $row['target'.$tahun.'_harga']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(11, $excel_row, $row['target'.$tahun.'_sumber_dana']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(12, $excel_row, $row['target'.$tahun.'_catatan']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(13, $excel_row, $row['target'.($tahun+1).'_tahun']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(14, $excel_row, $row['target'.($tahun+1).'_satuan_nama']);
+                        $object->getActiveSheet()->setCellValueByColumnAndRow(15, $excel_row, $row['target'.($tahun+1).'_harga']);
+                    }
+                    $excel_row++;
+                }
+
+                // memberi border Atas
+                $borderArray = array(
+                    'borders' => array(
+                        'allborders' => array(
+                            'style' => PHPExcel_Style_Border::BORDER_THIN
+                        )
+                    )
+                );
+
+                $object->getActiveSheet()->getStyle("A1:D2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("E1:E2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("F1:G1")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("H1:L1")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("M1:M2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("N1:P1")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("I2:J2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("N2:O2")->applyFromArray($borderArray);
+
+                $object->getActiveSheet()->getStyle("F2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("G2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("K2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("L2")->applyFromArray($borderArray);
+                $object->getActiveSheet()->getStyle("P2")->applyFromArray($borderArray);
+                // end memberi border Atas
+
+                // merge cell
+                $object->getActiveSheet()->mergeCells("A1:D2");
+                $object->getActiveSheet()->mergeCells("E1:E2");
+                $object->getActiveSheet()->mergeCells("F1:G1");
+                $object->getActiveSheet()->mergeCells("H1:L1");
+                $object->getActiveSheet()->mergeCells("M1:M2");
+                $object->getActiveSheet()->mergeCells("N1:P1");
+                $object->getActiveSheet()->mergeCells("I2:J2");
+                $object->getActiveSheet()->mergeCells("N2:O2");
+                // end merge cell    
+
+                $columnCell = 0;
+                while($columnCell <= ($column-1)){
+                    $dataCell = 0;
+                    while($dataCell <= ($excel_row-1)){
+                        // memberi border bawah
+                        $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->applyFromArray(
+                        array(
+                            'borders' => array(
+                                'allborders' => array(
+                                    'style' => PHPExcel_Style_Border::BORDER_THIN
+                                    )
+                            )
+                        )
+                        );
+                        // end memberi border bawah
+
+                        // menset align center
+                        $object->getActiveSheet()->getStyle("A".$dataCell)->applyFromArray($styleHorizontal);
+                        $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->applyFromArray($styleVertical);
+                        // end menset align center
+
+                        // Text wrapping
+                        $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->getAlignment()->setWrapText(true);
+                        // end text wrapping
+
+                        $dataCell++;
+                    }
+
+                    // mengatur auto menyesuaikan lebar
+                    $object->getActiveSheet()->getColumnDimension($cells[$columnCell])->setAutoSize(true);
+                    // $object->getActiveSheet()->getColumnDimension("A")->setWidth(10);
+                    // end auto menyesuaikan lebar
+
+                    // menebalkan font
+                    $object->getActiveSheet()->getStyle($cells[$columnCell]."1")->getFont()->setBold(true);
+                    $object->getActiveSheet()->getStyle($cells[$columnCell]."2")->getFont()->setBold(true);
+                    // end menebalkan font
+
+                    // menset align center
+                    $object->getActiveSheet()->getStyle($cells[$columnCell]."1")->applyFromArray($styleHorizontal);
+                    $object->getActiveSheet()->getStyle($cells[$columnCell]."1")->applyFromArray($styleVertical);
+                    $object->getActiveSheet()->getStyle($cells[$columnCell]."2")->applyFromArray($styleHorizontal);
+                    $object->getActiveSheet()->getStyle($cells[$columnCell]."2")->applyFromArray($styleVertical);
+                    // end menset align center
+
+                    $columnCell++;
+                }
             }
+
+            
+           
         }else if($name == 'rka'){
             $this->load->library("excel");
 
@@ -1300,6 +1568,21 @@ class CrudController extends CI_Controller {
             $object = new PHPExcel();
     
             $object->setActiveSheetIndex(0);
+
+            // mengatur variable align center
+            $styleHorizontal = array(
+                'alignment' => array(
+                    'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+                )
+            );
+            $styleVertical = array(
+                'alignment' => array(
+                    'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+                )
+            );
+            // end mengatur variable align center
+
+            $cells = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
     
             $table_columns = array(
                
@@ -1335,66 +1618,68 @@ class CrudController extends CI_Controller {
                 }
                 $row++;            
             }
-    
+            // print_r(@$dataAll);
+            extract($dataAll);
             $excel_row = $row;
             $nomor = 1;
             $countRow = 0;
             // echo "<pre>";
-            // print_r($data);
+            // print_r(@$dataAll['tahun']);
             // echo "</pre>";
             $tahun = 1+$this->tahun-@$data[0]['rpjmd_tahun'];
-            foreach($data as $row)
+            $namaTahunLalu = "tahun".($tahun-1)."_sebelum";
+            $namaTahun = "tahun".($tahun)."_sebelum";
+            $namaTahunDepan = "tahun".($tahun+1)."_sebelum";
+            
+            while($countRow <= 9)
             {
                 if($countRow == 0){
                     $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, "Urusan Pemerintahan");
                     $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, ":");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['Kd_Urusan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Urusan']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, @$dataOneOpd->Kd_Urusan);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, @$dataOneOpd->Nm_Urusan);
                 }else if($countRow == 1){
                     $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, "Organisasi");
                     $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, ":");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['Kd_Urusan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Urusan']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, @$dataOneOpd->Kd_Urusan.".".@$dataOneOpd->Kd_Bidang);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, @$dataOneOpd->Nm_Bidang);
                 }else if($countRow == 2){
                     $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, "Unit Organisasi");
                     $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, ":");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['Kd_Urusan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Urusan']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, @$dataOneOpd->Kd_Urusan.".".@$dataOneOpd->Kd_Bidang.".".@$dataOneOpd->Kd_Unit);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, @$dataOneOpd->Nm_Unit);
                 }else if($countRow == 3){
                     $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, "Sub Unit Organisasi");
                     $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, ":");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['Kd_Urusan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Urusan']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, @$dataOneOpd->Kd_Urusan.".".@$dataOneOpd->Kd_Bidang.".".@$dataOneOpd->Kd_Unit.".".@$dataOneOpd->Kd_Sub);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, @$dataOneOpd->Nm_Sub_Unit);
                 }else if($countRow == 4){
                     $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, "Program");
                     $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, ":");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['Kd_Urusan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Urusan']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, @$dataOneKegiatan->Kd_Urusan.".".@$dataOneKegiatan->Kd_Bidang.".".@$dataOneKegiatan->Kd_Prog);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, @$dataOneKegiatan->Ket_Program);
                 }else if($countRow == 5){
                     $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, "Kegiatan");
                     $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, ":");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['Kd_Urusan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Urusan']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, @$dataOneKegiatan->Kd_Urusan.".".@$dataOneKegiatan->Kd_Bidang.".".@$dataOneKegiatan->Kd_Prog.".".@$dataOneKegiatan->Kd_Keg);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, @$dataOneKegiatan->Ket_Kegiatan);
                 }else if($countRow == 6){
                     $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, "Lokasi Kegiatan");
                     $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, ":");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['Kd_Urusan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Urusan']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, "Tersebar");
                 }else if($countRow == 7){
                     $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, "Jumlah Tahun n - 1");
                     $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, ":");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['Kd_Urusan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Urusan']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, "Rp.".@$dataOneOpd->$namaTahunLalu."");
+                    
                 }else if($countRow == 8){
                     $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, "Jumlah Tahun n");
                     $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, ":");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['Kd_Urusan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Urusan']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, "Rp.".@$dataOneOpd->$namaTahun."");
                 }else if($countRow == 9){
                     $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, "Jumlah Tahun n + 1");
                     $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, ":");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['Kd_Urusan']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Urusan']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, "Rp.".@$dataOneOpd->$namaTahunDepan."");
                 }
                 
                 $countRow++;
@@ -1431,24 +1716,16 @@ class CrudController extends CI_Controller {
             {
                 if($countRow == 0){
                     $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, "Capaian Program");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, "");
                     $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, "100%");
                 }else if($countRow == 1){
                     $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, "Masukan");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, "");
                     $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, "Rp.");
                 }else if($countRow == 2){
                     $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, "Keluaran");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, "");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, "");
                 }else if($countRow == 3){
                     $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, "Hasil");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, "");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, "");
                 }else if($countRow == 4){
                     $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, "Kelompok Sasaran Kegiatan : Kelompok Nelayan");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, "");
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, "");
                 }
                 
                 $countRow++;
@@ -1506,9 +1783,10 @@ class CrudController extends CI_Controller {
                     
                 }else{
                     $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, $row['komentar']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, $row['volume']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(5, $excel_row, $row['satuan_nama']);
-                    $object->getActiveSheet()->setCellValueByColumnAndRow(5, $excel_row, $row['harga']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, "-".$row['nama_belanja']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['volume']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['satuan_nama']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(4, $excel_row, $row['harga']);
                     $object->getActiveSheet()->setCellValueByColumnAndRow(5, $excel_row, ($row['harga']+$row['volume']));
                 }
                 
@@ -1516,7 +1794,267 @@ class CrudController extends CI_Controller {
                 $excel_row++;
             }
 
-            // echo "sasasa";
+            // memberi border Atas
+            $borderArray = array(
+                'borders' => array(
+                    'allborders' => array(
+                        'style' => PHPExcel_Style_Border::BORDER_THIN
+                    )
+                )
+            );
+
+            $object->getActiveSheet()->getStyle("A1:C1")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("A2:C2")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("A3:C3")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("A17:C17")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("A23:C23")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("A27:A28")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("B27:B28")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("C27:E27")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("F27:F28")->applyFromArray($borderArray);
+
+            $object->getActiveSheet()->getStyle("D1")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("D2")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("D3")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("A18")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("B18")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("C18")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("C28")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("D28")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("E28")->applyFromArray($borderArray);
+            // end memberi border Atas
+
+            // merge cell
+            $object->getActiveSheet()->mergeCells("A1:C1");
+            $object->getActiveSheet()->mergeCells("A2:C2");
+            $object->getActiveSheet()->mergeCells("A3:C3");
+            $object->getActiveSheet()->mergeCells("A17:C17");
+            $object->getActiveSheet()->mergeCells("A23:C23");
+            $object->getActiveSheet()->mergeCells("A27:A28");
+            $object->getActiveSheet()->mergeCells("B27:B28");
+            $object->getActiveSheet()->mergeCells("C27:E27");
+            $object->getActiveSheet()->mergeCells("F27:F28");
+            // end merge cell    
+
+             // memberi border Bawah
+             $borderArray = array(
+                'borders' => array(
+                    'allborders' => array(
+                        'style' => PHPExcel_Style_Border::BORDER_THIN
+                    )
+                )
+            );
+
+            $object->getActiveSheet()->getStyle("A4:D13")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("A19:C23")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("A29:F36")->applyFromArray($borderArray);
+            // end memberi border Bawah
+
+            $columnCell = 0;
+            while($columnCell <= ($column-1)){
+                $dataCell = 0;
+                while($dataCell <= ($excel_row-1)){
+                    // memberi border bawah
+                    // $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->applyFromArray(
+                    // array(
+                    //     'borders' => array(
+                    //         'allborders' => array(
+                    //             'style' => PHPExcel_Style_Border::BORDER_THIN
+                    //             )
+                    //     )
+                    // )
+                    // );
+                    // end memberi border bawah
+
+                    // menset align center
+                    // $object->getActiveSheet()->getStyle("A".$dataCell)->applyFromArray($styleHorizontal);
+                    $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->applyFromArray($styleVertical);
+                    // end menset align center
+
+                    // Text wrapping
+                    $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->getAlignment()->setWrapText(true);
+                    // end text wrapping
+
+                    $dataCell++;
+                }
+
+                // mengatur auto menyesuaikan lebar
+                $object->getActiveSheet()->getColumnDimension($cells[$columnCell])->setAutoSize(true);
+                // $object->getActiveSheet()->getColumnDimension("A")->setWidth(10);
+                // end auto menyesuaikan lebar
+
+                // menebalkan font
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."1")->getFont()->setBold(true);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."2")->getFont()->setBold(true);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."3")->getFont()->setBold(true);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."17")->getFont()->setBold(true);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."18")->getFont()->setBold(true);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."27")->getFont()->setBold(true);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."28")->getFont()->setBold(true);
+                // end menebalkan font
+
+                // menset align center
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."1")->applyFromArray($styleHorizontal);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."1")->applyFromArray($styleVertical);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."2")->applyFromArray($styleHorizontal);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."2")->applyFromArray($styleVertical);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."3")->applyFromArray($styleHorizontal);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."3")->applyFromArray($styleVertical);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."17")->applyFromArray($styleHorizontal);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."17")->applyFromArray($styleVertical);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."18")->applyFromArray($styleHorizontal);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."18")->applyFromArray($styleVertical);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."27")->applyFromArray($styleHorizontal);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."27")->applyFromArray($styleVertical);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."28")->applyFromArray($styleHorizontal);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."28")->applyFromArray($styleVertical);
+                // end menset align center
+
+                $columnCell++;
+            }
+        }else if($name == 'renstra-kab'){
+            $this->load->library("excel");
+
+            $fileName = $name."-".time();
+    
+            $object = new PHPExcel();
+    
+            $object->setActiveSheetIndex(0);
+            // echo "<pre>";
+            $tahun_rpjmd = $dataAll['tahun_rpjmd'];
+            // echo $dataAll.data[0][''];
+            $table_columns = array(
+                array(
+                    "Tujuan",
+                    "Sasaran",
+                    "Indikator",
+                    "Kode",
+                    "Program",
+                    "Kegiatan",
+                    "Indikator Kinerka (Outcome)",
+                    "",
+                    "Kondisi Kinerja pada Awal RPJMD (Tahun 0)",
+                    "Capaian Kerja",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "Lokasi",
+                    "Penanggungjawab",
+                ),
+                array(
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "Program",
+                    "Kegiatan",
+                    "",
+                    "".$tahun_rpjmd."",
+                    "",
+                    "".($tahun_rpjmd+1)."",
+                    "",
+                    "".($tahun_rpjmd+2)."",
+                    "",
+                    "".($tahun_rpjmd+3)."",
+                    "",
+                    "".($tahun_rpjmd+4)."",
+                    "",
+                    "Kondisi Kinerja Akhir Periode",
+                    "",
+                    "",
+                    "",
+                ),
+                array(
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "Target",
+                    "Rp",
+                    "Target",
+                    "Rp",
+                    "Target",
+                    "Rp",
+                    "Target",
+                    "Rp",
+                    "Target",
+                    "Rp",
+                    "Target",
+                    "Rp",
+                    "",
+                    "",
+                )
+    
+            );
+    
+            $column = 0;
+            $row = 1;
+            foreach($table_columns as $field)
+            {
+                $column = 0;
+                foreach($field as $field2){
+                    $object->getActiveSheet()->setCellValueByColumnAndRow($column, $row, $field2);
+                    $column++;
+                }
+                $row++;            
+            }
+    
+            $excel_row = $row;
+            $nomor = 1;
+            foreach($data as $row)
+            {
+                
+                if($row['Kd_Keg'] == null || $row['Kd_Keg'] == ''){
+                    
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, $row['tujuan_nama']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, $row['sasaran_nama']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['indikator_nama']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Urusan']." ".$row['Kd_Bidang']." ".$row['Kd_Prog']." ".$row['Kd_Keg']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(4, $excel_row, $row['Ket_Program']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(5, $excel_row, $row['Ket_Kegiatan']);
+
+                }else{
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, $row['tujuan_nama']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, $row['sasaran_nama']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $row['indikator_nama']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $row['Kd_Urusan']." ".$row['Kd_Bidang']." ".$row['Kd_Prog']." ".$row['Kd_Keg']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(4, $excel_row, $row['Ket_Program']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(5, $excel_row, $row['Ket_Kegiatan']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(6, $excel_row, $row['outcome']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(7, $excel_row, $row['outcome_kegiatan']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(8, $excel_row, $row['kondisi_awal']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(9, $excel_row, $row['target1_tahun']." ".$row['target1_satuan_nama']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(10, $excel_row, $row['target1_harga']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(11, $excel_row, $row['target2_tahun']." ".$row['target2_satuan_nama']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(12, $excel_row, $row['target2_harga']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(13, $excel_row, $row['target3_tahun']." ".$row['target3_satuan_nama']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(14, $excel_row, $row['target3_harga']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(15, $excel_row, $row['target4_tahun']." ".$row['target4_satuan_nama']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(16, $excel_row, $row['target4_harga']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(17, $excel_row, $row['target5_tahun']." ".$row['target5_satuan_nama']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(18, $excel_row, $row['target5_harga']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(19, $excel_row, $row['akhir_target']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(20, $excel_row, ($row['target1_harga']+$row['target2_harga']+$row['target3_harga']+$row['target4_harga']+$row['target5_harga']));
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(21, $excel_row, $row['lokasi']);
+                    $object->getActiveSheet()->setCellValueByColumnAndRow(22, $excel_row, $row['Nm_Sub_Unit']);
+                }
+                $excel_row++;
+            }
         }
         
         $object_writer = PHPExcel_IOFactory::createWriter($object, 'Excel5');

@@ -183,7 +183,7 @@ class TujuanSasaranController extends CI_Controller {
 
         $table_columns = array(
             array(
-                "Nomor",
+                "No",
                 "Misi",
                 "Isu Strategi RPJMD",
                 "Tujuan RPJMD",
@@ -212,6 +212,22 @@ class TujuanSasaranController extends CI_Controller {
             )
         );
 
+        
+        // mengatur variable align center
+        $styleHorizontal = array(
+            'alignment' => array(
+                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            )
+        );
+        $styleVertical = array(
+            'alignment' => array(
+                'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+            )
+        );
+        // end mengatur variable align center
+
+        $cells = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
+
         $column = 0;
         $row = 1;
         foreach($table_columns as $field)
@@ -236,13 +252,97 @@ class TujuanSasaranController extends CI_Controller {
             $object->getActiveSheet()->setCellValueByColumnAndRow(4, $excel_row, $row['sasaran_nama']);
             $object->getActiveSheet()->setCellValueByColumnAndRow(5, $excel_row, $row['indikator_nama']);
             $object->getActiveSheet()->setCellValueByColumnAndRow(6, $excel_row, $row['tujuan_sasaran_kondisi_awal']);
-            $object->getActiveSheet()->setCellValueByColumnAndRow(7, $excel_row, $row['target1_satuan_nama']." ".$row['target1_tahun']);
-            $object->getActiveSheet()->setCellValueByColumnAndRow(8, $excel_row, $row['target2_satuan_nama']." ".$row['target2_tahun']);
-            $object->getActiveSheet()->setCellValueByColumnAndRow(9, $excel_row, $row['target3_satuan_nama']." ".$row['target3_tahun']);
-            $object->getActiveSheet()->setCellValueByColumnAndRow(10, $excel_row, $row['target4_satuan_nama']." ".$row['target4_tahun']);
-            $object->getActiveSheet()->setCellValueByColumnAndRow(11, $excel_row, $row['target5_satuan_nama']." ".$row['target5_tahun']);
+            $object->getActiveSheet()->setCellValueByColumnAndRow(7, $excel_row, $row['target1_tahun']." ".$row['target1_satuan_nama']);
+            $object->getActiveSheet()->setCellValueByColumnAndRow(8, $excel_row, $row['target2_tahun']." ".$row['target2_satuan_nama']);
+            $object->getActiveSheet()->setCellValueByColumnAndRow(9, $excel_row, $row['target3_tahun']." ".$row['target3_satuan_nama']);
+            $object->getActiveSheet()->setCellValueByColumnAndRow(10, $excel_row, $row['target4_tahun']." ".$row['target4_satuan_nama']);
+            $object->getActiveSheet()->setCellValueByColumnAndRow(11, $excel_row, $row['target5_tahun']." ".$row['target5_satuan_nama']);
             $excel_row++;
             $nomor++;
+        }
+
+        // memberi border Atas
+        $borderArray = array(
+            'borders' => array(
+                'allborders' => array(
+                    'style' => PHPExcel_Style_Border::BORDER_THIN
+                )
+            )
+        );
+
+        $object->getActiveSheet()->getStyle("A1:A2")->applyFromArray($borderArray);
+        $object->getActiveSheet()->getStyle("B1:B2")->applyFromArray($borderArray);
+        $object->getActiveSheet()->getStyle("C1:C2")->applyFromArray($borderArray);
+        $object->getActiveSheet()->getStyle("D1:D2")->applyFromArray($borderArray);
+        $object->getActiveSheet()->getStyle("E1:E2")->applyFromArray($borderArray);
+        $object->getActiveSheet()->getStyle("F1:F2")->applyFromArray($borderArray);
+        $object->getActiveSheet()->getStyle("G1:G2")->applyFromArray($borderArray);
+        $object->getActiveSheet()->getStyle("H1:L1")->applyFromArray($borderArray);
+
+        $object->getActiveSheet()->getStyle("H2")->applyFromArray($borderArray);
+        $object->getActiveSheet()->getStyle("I2")->applyFromArray($borderArray);
+        $object->getActiveSheet()->getStyle("J2")->applyFromArray($borderArray);
+        $object->getActiveSheet()->getStyle("K2")->applyFromArray($borderArray);
+        $object->getActiveSheet()->getStyle("L2")->applyFromArray($borderArray);
+        // end memberi border Atas
+
+        // merge cell
+        $object->getActiveSheet()->mergeCells("A1:A2");
+        $object->getActiveSheet()->mergeCells("B1:B2");
+        $object->getActiveSheet()->mergeCells("C1:C2");
+        $object->getActiveSheet()->mergeCells("D1:D2");
+        $object->getActiveSheet()->mergeCells("E1:E2");
+        $object->getActiveSheet()->mergeCells("F1:F2");
+        $object->getActiveSheet()->mergeCells("G1:G2");
+        $object->getActiveSheet()->mergeCells("H1:L1");
+        // end merge cell    
+
+        $columnCell = 0;
+        while($columnCell <= ($column-1)){
+            $dataCell = 0;
+            while($dataCell <= ($excel_row-1)){
+                // memberi border
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->applyFromArray(
+                array(
+                    'borders' => array(
+                        'allborders' => array(
+                            'style' => PHPExcel_Style_Border::BORDER_THIN
+                            )
+                    )
+                )
+                );
+                // end memberi border
+
+                // menset align center
+                $object->getActiveSheet()->getStyle("A".$dataCell)->applyFromArray($styleHorizontal);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->applyFromArray($styleVertical);
+                // end menset align center
+
+                // Text wrapping
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->getAlignment()->setWrapText(true);
+                // end text wrapping
+
+                $dataCell++;
+            }
+
+            // mengatur auto menyesuaikan lebar
+            $object->getActiveSheet()->getColumnDimension($cells[$columnCell])->setAutoSize(true);
+            // $object->getActiveSheet()->getColumnDimension("A")->setWidth(10);
+            // end auto menyesuaikan lebar
+
+            // menebalkan font
+            $object->getActiveSheet()->getStyle($cells[$columnCell]."1")->getFont()->setBold(true);
+            $object->getActiveSheet()->getStyle($cells[$columnCell]."2")->getFont()->setBold(true);
+            // end menebalkan font
+
+            // menset align center
+            $object->getActiveSheet()->getStyle($cells[$columnCell]."1")->applyFromArray($styleHorizontal);
+            $object->getActiveSheet()->getStyle($cells[$columnCell]."1")->applyFromArray($styleVertical);
+            $object->getActiveSheet()->getStyle($cells[$columnCell]."2")->applyFromArray($styleHorizontal);
+            $object->getActiveSheet()->getStyle($cells[$columnCell]."2")->applyFromArray($styleVertical);
+            // end menset align center
+
+            $columnCell++;
         }
 
         $object_writer = PHPExcel_IOFactory::createWriter($object, 'Excel5');

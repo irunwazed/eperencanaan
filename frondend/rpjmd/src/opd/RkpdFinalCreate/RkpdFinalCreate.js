@@ -42,7 +42,7 @@ class RkpdFinalCreate extends Component {
     }
 
     document.title = "Menyusun RKPD Final";
-    this.link = 'opd/menyusun/rkpd-verifikasi';
+    this.link = 'opd/menyusun/rkpd-final';
     
     this.modalDelete = this.modalDelete.bind(this);
 

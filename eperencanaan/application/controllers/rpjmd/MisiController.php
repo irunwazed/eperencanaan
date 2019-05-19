@@ -156,18 +156,58 @@ class MisiController extends CI_Controller {
         $object->setActiveSheetIndex(0);
 
         $table_columns = array(
-            "Nomor",
+            "No",
             "Misi", 
         );
 
-        $column = 0;
+        // mengatur variable align center
+        $styleHorizontal = array(
+            'alignment' => array(
+                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            )
+        );
+        $styleVertical = array(
+            'alignment' => array(
+                'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+            )
+        );
+        // end mengatur variable align center
 
+        $column = 0;
         foreach($table_columns as $field)
         {
             $object->getActiveSheet()->setCellValueByColumnAndRow($column, 1, $field);
+            
+            // memberi border
+            $object->getActiveSheet()->getStyle("A".$column)->applyFromArray(
+                array(
+                    'borders' => array(
+                        'allborders' => array(
+                            'style' => PHPExcel_Style_Border::BORDER_THIN
+                            )
+                    )
+                )
+            );
+            // end memberi border
+
+            // memberi border
+            $object->getActiveSheet()->getStyle("B".$column)->applyFromArray(
+                array(
+                    'borders' => array(
+                        'allborders' => array(
+                            'style' => PHPExcel_Style_Border::BORDER_THIN
+                            )
+                    )
+                )
+            );
+            // end memberi border
+
             $column++;
         }
-
+        // menset align center
+        $object->getActiveSheet()->getStyle("B1")->applyFromArray($styleHorizontal);
+        $object->getActiveSheet()->getStyle("B1")->applyFromArray($styleVertical);
+        // end menset align center
         
         $excel_row = 2;
         $nomor = 1;
@@ -175,10 +215,55 @@ class MisiController extends CI_Controller {
         {
             $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, $nomor);
             $object->getActiveSheet()->setCellValueByColumnAndRow(1, $excel_row, $row['misi_nama']);
+            
+            // memberi border
+            $object->getActiveSheet()->getStyle("A".$excel_row)->applyFromArray(
+                array(
+                    'borders' => array(
+                        'allborders' => array(
+                            'style' => PHPExcel_Style_Border::BORDER_THIN
+                            )
+                    )
+                )
+            );
+            // end memberi border
+
+            // memberi border
+            $object->getActiveSheet()->getStyle("B".$excel_row)->applyFromArray(
+                array(
+                    'borders' => array(
+                        'allborders' => array(
+                            'style' => PHPExcel_Style_Border::BORDER_THIN
+                            )
+                    )
+                )
+            );
+            // end memberi border
+
+            // Text wrapping
+            $object->getActiveSheet()->getStyle("B".$excel_row)->getAlignment()->setWrapText(true);
+            // end text wrapping
+
+            // menset align center
+            $object->getActiveSheet()->getStyle("A".$excel_row)->applyFromArray($styleHorizontal);
+            $object->getActiveSheet()->getStyle("A".$excel_row)->applyFromArray($styleVertical);
+            $object->getActiveSheet()->getStyle("B".$excel_row)->applyFromArray($styleVertical);
+            // end menset align center
+
             $excel_row++;
             $nomor++;
         }
 
+        // menebalkan font
+        $object->getActiveSheet()->getStyle('A1')->getFont()->setBold(true);
+        $object->getActiveSheet()->getStyle('B1')->getFont()->setBold(true);
+        // end menebalkan font
+
+        // mengatur auto menyesuaikan lebar
+        $object->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $object->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        // end auto menyesuaikan lebar
+        
         $object_writer = PHPExcel_IOFactory::createWriter($object, 'Excel5');
         header('Content-Type: application/vnd.ms-excel');
         header('Content-Disposition: attachment;filename="'.$fileName.'.xls"');

@@ -3,6 +3,7 @@ import { Alert, Input, Card, CardBody, CardHeader, Col, Pagination, PaginationIt
 import axios from 'axios';
 import config from '../../config';
 import loadingImage from '../../assets/img/loading.gif';
+import Download from '../../rpjmd/other/Download';
 
 class RkpdAwalCreate extends Component {
   
@@ -396,6 +397,7 @@ simpan(data){
                 </Col>
               </FormGroup>
             </Form> */}
+            <Download link={this.link}/>
             </Col>
             <Col xs="12" md="2">
               {/* <Button color="info" onClick={() => {this.setState({aksi:'Tambah'});this.tambah();}} className="mr-1">Tambah</Button> */}

@@ -160,7 +160,7 @@ class StrategiKebijakanController extends CI_Controller {
         $object->setActiveSheetIndex(0);
 
         $table_columns = array(
-            "Nomor",
+            "No",
             "Misi",
             "Tujuan",
             "Bidang",
@@ -171,10 +171,55 @@ class StrategiKebijakanController extends CI_Controller {
             "Arah Kebijakan",
         );
 
+        // mengatur variable align center
+        $styleHorizontal = array(
+            'alignment' => array(
+                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            )
+        );
+        $styleVertical = array(
+            'alignment' => array(
+                'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+            )
+        );
+        // end mengatur variable align center
+
+        $cells = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
+        
         $column = 0;
+        $countAtas = 0;
         foreach($table_columns as $field)
         {
             $object->getActiveSheet()->setCellValueByColumnAndRow($column, 1, $field);
+            
+            // memberi border
+            $object->getActiveSheet()->getStyle($cells[$countAtas]."1")->applyFromArray(
+                array(
+                    'borders' => array(
+                        'allborders' => array(
+                            'style' => PHPExcel_Style_Border::BORDER_THIN
+                        )
+                    )
+                )
+            );
+            // end memberi border
+
+            // menebalkan font
+            $object->getActiveSheet()->getStyle($cells[$countAtas]."1")->getFont()->setBold(true);
+            // end menebalkan font
+
+            // mengatur auto menyesuaikan lebar
+            $object->getActiveSheet()->getColumnDimension($cells[$countAtas])->setAutoSize(true);
+            // end auto menyesuaikan lebar
+         
+            // menset align center
+            $object->getActiveSheet()->getStyle($cells[$countAtas]."1")->applyFromArray($styleHorizontal);
+            $object->getActiveSheet()->getStyle($cells[$countAtas]."1")->applyFromArray($styleVertical);
+            // end menset align center
+            
+            // echo "Ini Cell".$cells[$count]."1";
+            
+            $countAtas++;
             $column++;          
         }
 
@@ -190,12 +235,42 @@ class StrategiKebijakanController extends CI_Controller {
             $object->getActiveSheet()->setCellValueByColumnAndRow(4, $excel_row, $row['Nm_Urusan']);
             $object->getActiveSheet()->setCellValueByColumnAndRow(5, $excel_row, $row['sasaran_nama']);
             $object->getActiveSheet()->setCellValueByColumnAndRow(6, $excel_row, $row['indikator_nama']);
-            $object->getActiveSheet()->setCellValueByColumnAndRow(6, $excel_row, $row['strategi_pembangunan']);
-            $object->getActiveSheet()->setCellValueByColumnAndRow(6, $excel_row, $row['arah_kebijakan']);
+            $object->getActiveSheet()->setCellValueByColumnAndRow(7, $excel_row, $row['strategi_pembangunan']);
+            $object->getActiveSheet()->setCellValueByColumnAndRow(8, $excel_row, $row['arah_kebijakan']);
             $excel_row++;
             $nomor++;
         }
 
+        $columnCell = 0;
+        while($columnCell <= ($column-1)){
+            $dataCell = 0;
+            while($dataCell <= ($excel_row-1)){
+                // memberi border
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->applyFromArray(
+                    array(
+                        'borders' => array(
+                            'allborders' => array(
+                                'style' => PHPExcel_Style_Border::BORDER_THIN
+                                )
+                        )
+                    )
+                );
+                // end memberi border
+                
+                // menset align center
+                $object->getActiveSheet()->getStyle("A".$dataCell)->applyFromArray($styleHorizontal);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->applyFromArray($styleVertical);
+                // end menset align center
+
+                // Text wrapping
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->getAlignment()->setWrapText(true);
+                // end text wrapping
+
+                $dataCell++;
+            }
+            $columnCell++;
+        }
+        
         $object_writer = PHPExcel_IOFactory::createWriter($object, 'Excel5');
         header('Content-Type: application/vnd.ms-excel');
         header('Content-Disposition: attachment;filename="'.$fileName.'.xls"');

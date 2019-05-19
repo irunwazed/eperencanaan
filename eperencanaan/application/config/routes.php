@@ -232,6 +232,7 @@ $route['opd/menyusun/renstra-kab/page-(:num)'] = "opd/CrudController/getData/opd
 $route['opd/menyusun/renstra-kab/create'] = "opd/CrudController/create/opd_renstra_kab";
 $route['opd/menyusun/renstra-kab/update'] = "opd/CrudController/update/opd_renstra_kab";
 $route['opd/menyusun/renstra-kab/delete'] = "opd/CrudController/delete/opd_renstra_kab";
+$route['opd/menyusun/renstra-kab/save/(:any)'] = "opd/CrudController/getData/opd_renstra_kab/1/$1";
 
 $route['opd/menyusun/renstra-opd/page-(:num)'] = "opd/CrudController/getData/opd_renstra_opd/$1";
 $route['opd/menyusun/renstra-opd/create'] = "opd/CrudController/create/opd_renstra_opd";
@@ -243,6 +244,7 @@ $route['opd/menyusun/rkpd-awal/page-(:num)'] = "opd/CrudController/getData/opd_r
 $route['opd/menyusun/rkpd-awal/create'] = "opd/CrudController/create/opd_rkpd_awal";
 $route['opd/menyusun/rkpd-awal/update'] = "opd/CrudController/update/opd_rkpd_awal";
 $route['opd/menyusun/rkpd-awal/delete'] = "opd/CrudController/delete/opd_rkpd_awal";
+$route['opd/menyusun/rkpd-awal/save/(:any)'] = "opd/CrudController/getData/opd_rkpd_awal/1/$1";
 
 $route['opd/menyusun/hasil-musrenbang/page-(:num)'] = "opd/CrudController/getData/opd_hasil_musrenbang/$1";
 $route['opd/menyusun/hasil-musrenbang/create'] = "opd/CrudController/create/opd_hasil_musrenbang";
@@ -264,6 +266,7 @@ $route['opd/menyusun/rkpd-final/page-(:num)'] = "opd/CrudController/getData/opd_
 $route['opd/menyusun/rkpd-final/create'] = "opd/CrudController/create/opd_rkpd_final";
 $route['opd/menyusun/rkpd-final/update'] = "opd/CrudController/update/opd_rkpd_final";
 $route['opd/menyusun/rkpd-final/delete'] = "opd/CrudController/delete/opd_rkpd_final";
+$route['opd/menyusun/rkpd-final/save/(:any)'] = "opd/CrudController/getData/opd_rkpd_final/1/$1";
 
 $route['opd/menyusun/renja-awal/page-(:num)'] = "opd/CrudController/getData/opd_renja_awal/$1";
 $route['opd/menyusun/renja-awal/create'] = "opd/CrudController/create/opd_renja_awal";
