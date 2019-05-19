@@ -1,6 +1,12 @@
 {
+<<<<<<< HEAD
+    "apiRoot": "http://localhost/eperencanaan/eperencanaan/", 
+    "apiMusrenbang": "http://localhost/eperencanaan/perencanaan/",
+    "apiSatuanHarga": "http://localhost/eperencanaan/satuanharga/",
+=======
     "apiRoot": "http://localhost/ci/eperencanaan/", 
     "apiMusrenbang": "http://localhost/ci/perencanaan/",
     "apiSatuanHarga": "http://localhost/ci/satuanharga/",
+>>>>>>> fa5c1801bd9460286033898248d86d7d650916c4
     "index": 1
 }
