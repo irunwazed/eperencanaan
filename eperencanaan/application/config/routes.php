@@ -60,8 +60,6 @@ $route['rpjmd/login/(:num)'] = "rpjmd/LoginController/login/$1";
 
 $route['rpjmd/get-data'] = "rpjmd/SetController";
 
-
-
 $route['rpjmd/menyusun/visi/page-(:num)'] = "rpjmd/VisiController/getData/$1";
 $route['rpjmd/menyusun/visi/create'] = "rpjmd/VisiController/create";
 $route['rpjmd/menyusun/visi/update'] = "rpjmd/VisiController/update";
@@ -302,13 +300,29 @@ $route['opd/menyusun/rka-pra-perubahan/kirim'] = "opd/CrudController/other/opd_p
 $route['opd/get-data/kegiatan'] = "opd/DataController/getKegiatan";
 $route['opd/get-data/rkpd'] = "opd/DataController/selectRkpd";
 
-
-
 $route['opd/get-export/kegiatan'] = "opd/ImportController/export/kegiatan";
 
-
-
 //.opd
+
+// bappeda
+$route['bappeda/pagu'] = "bappeda/PaguController/getData";
+$route['bappeda/pagu/create'] = "bappeda/PaguController/setData/create";
+$route['bappeda/pagu/update'] = "bappeda/PaguController/setData/update";
+$route['bappeda/pagu/delete/(:num)'] = "bappeda/PaguController/setData/delete/$1";
+$route['bappeda/pagu/save/(:any)'] = "bappeda/PaguController/getData/$1";
+$route['bappeda/pagu/get-data/(:num)'] = "bappeda/PaguController/getOneData/$1";
+
+$route['bappeda/renstra'] = "bappeda/PaguController/getData";
+$route['bappeda/renstra/create'] = "bappeda/PaguController/setData/create";
+$route['bappeda/renstra/update'] = "bappeda/PaguController/setData/update";
+$route['bappeda/renstra/delete/(:num)'] = "bappeda/PaguController/setData/delete/$1";
+$route['bappeda/renstra/save/(:any)'] = "bappeda/PaguController/getData/$1";
+$route['bappeda/renstra/get-data/(:num)'] = "bappeda/PaguController/getOneData/$1";
+
+//. bappeda
+
+
+
 
 // admin
 $route['admin/user/page-(:num)'] = "administrator/CrudController/getData/admin_user/$1";

@@ -2,6 +2,7 @@
   ///////////////////////////////////////////////// SETTING ///////////////////////////////////////////  
     var link = 'opd/menyusun/renstra-kab';
     var dataAll;
+    var dataTambahan;
     var dataPilih = {};
 
     var dataTable = {
@@ -9,8 +10,9 @@
     };
     var dataForm = [];
     
-    $("#component").show();
+    
     $(document).ready( function() {
+        $("#component").show();
         $("#judul-modal").text(dataTable.judul);  
         $("#judul-page").text(dataTable.judul);  
         createHeadTable();
@@ -42,7 +44,6 @@
                 row += "<td>"+element[dataForm[no].name]+"</td>"; no++;
                 row += "<td colspan='24'></td>";
             }else{
-                
                 row += "<td>"+element[dataForm[no].name]+"</td>"; no++;
                 row += "<td>"+element[dataForm[no].name]+"</td>"; no++;
                 row += "<td>"+element[dataForm[no].name]+"</td>"; no++;
@@ -84,6 +85,14 @@
         });
     }
 
+    function inputKegiatan(data){
+        // console.log(data);
+        data.forEach(element =>{
+            row = '<option value="'+element.Kd_Keg+'">'+element.Ket_Kegiatan+'</option>';
+            $(dataForm[9].tag+"[name^="+dataForm[9].name+"]").append(row);
+        });
+    }
+
     // buat tag form
     function setForm(){
         dataForm = [
@@ -96,9 +105,9 @@
             { status:false, tag:'select', name:"Kd_Unit", judul: "", type: "", value: "", viewForm: false },
             { status:false, tag:'select', name:"Kd_Sub", judul: "", type: "", value: "", viewForm: false },
             { status:false, tag:'select', name:"Ket_Program", judul: "", type: "", value: "", viewForm: false },
-            { status:false, tag:'select', name:"Ket_Kegiatan", judul: "", type: "", value: "", viewForm: true },
+            { status:true, tag:'select', name:"Ket_Kegiatan", judul: "Kegiatan", type: "", value: "", viewForm: true },
             { status:false, tag:'select', name:"outcome", judul: "", type: "", value: "", viewForm: false },
-            { status:false, tag:'select', name:"outcome_kegiatan", judul: "", type: "", value: "", viewForm: false },
+            { status:false, tag:'input', name:"outcome_kegiatan", judul: "Outcome Kegiatan", type: "text", value: "", viewForm: false },
             { status:false, tag:'select', name:"kondisi_awal", judul: "", type: "", value: "", viewForm: false },
             { status:false, tag:'select', name:"target1_tahun", judul: "", type: "", value: "", viewForm: false },
             { status:false, tag:'select', name:"target1_satuan_nama", judul: "", type: "", value: "", viewForm: false },
@@ -119,14 +128,15 @@
             { status:false, tag:'select', name:"lokasi", judul: "", type: "", value: "", viewForm: false },
             { status:false, tag:'select', name:"lokasi", judul: "", type: "", value: "", viewForm: false },
             { status:false, tag:'select', name:"Nm_Sub_Unit", judul: "", type: "", value: "", viewForm: false },
+            { status:false, tag:'hidden', name:"Kd_Keg", judul: "", type: "", value: "", viewForm: false },
         ]
         
-        dataForm.forEach(element => {
-            $("#modal-body").empty();
-            if(element.viewForm){
-                $("#modal-body").append(form(element));
-            }
-        });
+        $("#modal-body").empty();
+        $("#modal-body").append(form(dataForm[0]));
+        $("#modal-body").append(form(dataForm[9]));
+        $("#modal-body").append(form(dataForm[11]));
+        $("#modal-body").append(form(dataForm[32]));
+        
     }
 
     // make head table
@@ -200,23 +210,18 @@
     function setData(id = null){
         
         if(id == null){
-
             //tetap
             dataPilih.session = getCookie('codexv-session');
             dataPilih.rpjmd = getCookie('codexv-rpjmd');
 
-
-            //otomatis mengisi
-            dataForm.forEach(element =>{
-                if(element.status)
-                    dataPilih[element.name] = $("input[name^='"+element.name+"']").val();
-            });
-            
-            
+            dataPilih[dataForm[0].name] = $("input[name^='"+dataForm[0].name+"']").val();
+            dataPilih[dataForm[9].name] = $(""+dataForm[9].tag+"[name^='"+dataForm[9].name+"']").val();
+            dataPilih[dataForm[11].name] = $("input[name^='"+dataForm[11].name+"']").val();
+            dataPilih[dataForm[32].name] = $("input[name^='"+dataForm[32].name+"']").val();
         }else{
             getDataId(id);
             //manual isi karena berstatus false
-            $("select[name^='Nm_Sub_Unit']").val(dataPilih.Kd_Urusan+'-'+dataPilih.Kd_Bidang+'-'+dataPilih.Kd_Unit+'-'+dataPilih.Kd_Sub);
+            // $("select[name^='Nm_Sub_Unit']").val(dataPilih.Kd_Urusan+'-'+dataPilih.Kd_Bidang+'-'+dataPilih.Kd_Unit+'-'+dataPilih.Kd_Sub);
             
             //otomatis mengisi
             dataForm.forEach(element =>{
@@ -236,16 +241,23 @@
         });
     }
 
-    function getKegiatan(){
+    function getKegiatan(urusan, bidang, program){
         let url = config.apiRoot+'opd/get-data/kegiatan';
-        setData();
-        console.log(dataPilih);
-        // $.when(sendAjax(url, dataPilih)).done(function(a1){
-        //     $.when(getData()).done(function(a1){
-        //         rowpos = $('#table tr:last').position();
-        //         $("html, body").animate({ scrollTop: rowpos.top });
-        //     });
-        // });
+
+        let dataKirim = {
+            session: getCookie('codexv-session'),
+            urusan: urusan,
+            bidang: bidang,
+            program: program,
+        }
+        console.log(dataKirim);
+        $.when(sendAjax(url, dataKirim, false)).done(function(a1){
+            $.when(getData()).done(function(a1){
+                rowpos = $('#table tr:last').position();
+                $("html, body").animate({ scrollTop: rowpos.top });
+                inputKegiatan(dataTambahan.data);
+            });
+        });
     }
 
     // tambah proses
@@ -266,6 +278,9 @@
     function editRow(obj){
         let id = $(obj).attr('data-id');
         setData(id);
+
+        getKegiatan(dataPilih.Kd_Urusan, dataPilih.Kd_Bidang, dataPilih.Kd_Prog);
+        console.log(dataPilih);
         $("input[name^='"+dataForm[0].name+"']").val(id);
         $('#modal').modal('show');
     }
@@ -274,7 +289,17 @@
         event.preventDefault();
         setData();
         url = config.apiRoot+link+'/update';
-        $.when(sendAjax(url, dataPilih)).done(function(a1){
+
+        dataKirim = {
+            session:dataPilih.session,
+            rpjmd:dataPilih.rpjmd,
+            perumusan_program_id:dataPilih.perumusan_program_id,
+            Kd_Keg: dataPilih.Ket_Kegiatan,
+            outcome_kegiatan:dataPilih.outcome_kegiatan,
+        }
+        // console.log("lihat data");
+        // console.log(dataPilih);
+        $.when(sendAjax(url, dataKirim)).done(function(a1){
             $('#modal').modal('hide');
             $.when(getData()).done(function(a1){
                 $('#row'+dataPilih[dataForm[0].name]).attr("style", "background-color: #CCC");
@@ -333,7 +358,7 @@
 		});
     }
 
-    function sendAjax(url, dataKirim){
+    function sendAjax(url, dataKirim, meesage = true){
         loading();
         return $.ajax({
 			type: "POST",
@@ -342,11 +367,15 @@
 			data: dataKirim, 
 			success: function(respon)
 			{   
-                if(respon.status){
-                    message(respon.pesan);
-                }else{
-                    message(respon.pesan, "warning");
+                if(meesage){
+                    if(respon.status){
+                        message(respon.pesan);
+                    }else{
+                        message(respon.pesan, "warning");
+                    }
                 }
+                
+                dataTambahan = respon;
                 console.log(respon);
                 loading(false);
 			},
