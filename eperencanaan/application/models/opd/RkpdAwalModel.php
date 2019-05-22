@@ -49,7 +49,7 @@ class RkpdAwalModel extends CI_Model
         $this->db->join('ref_tujuan', 'ref_tujuan.tujuan_id = ref_sasaran.tujuan_id', 'left');
         $this->db->join('ref_misi', 'ref_misi.misi_id = ta_isu_strategi.misi_id AND ref_misi.misi_id = ref_tujuan.misi_id', 'left');
         $this->db->join('ref_rpjmd', 'ref_rpjmd.rpjmd_id = ref_misi.rpjmd_id', 'left');
-        $this->db->join('ref_rpjmd_user', 'ref_rpjmd_user.rpjmd_id = ref_rpjmd.rpjmd_id', 'left');
+        // $this->db->join('ref_rpjmd_user', 'ref_rpjmd_user.rpjmd_id = ref_rpjmd.rpjmd_id', 'left');
 
         $this->db->join('ref_program', 'ref_program.Kd_Prog = ta_perumusan_program.Kd_Prog AND ta_isu_strategi.Kd_Urusan = ref_program.Kd_Urusan AND ta_isu_strategi.Kd_Bidang = ref_program.Kd_Bidang', 'left');
         $this->db->join('ref_kegiatan', 'ref_kegiatan.Kd_Keg = ta_perumusan_program.Kd_Keg AND ref_kegiatan.Kd_Prog = ta_perumusan_program.Kd_Prog  AND ta_isu_strategi.Kd_Urusan = ref_kegiatan.Kd_Urusan AND ta_isu_strategi.Kd_Bidang = ref_kegiatan.Kd_Bidang', 'left');
@@ -61,7 +61,7 @@ class RkpdAwalModel extends CI_Model
         // $this->db->where('ta_perumusan_program.Kd_Sub', $opd[0]['Kd_Sub']);
         
         // $this->db->where('ref_rpjmd_user.user_id', $post['user_id']);
-        $this->db->where('ref_rpjmd_user.rpjmd_id', $post['rpjmd']);
+        $this->db->where('ref_rpjmd.rpjmd_id', $post['rpjmd']);
         $this->db->order_by("ta_isu_strategi.Kd_Urusan", "ASC");
         $this->db->order_by("ta_isu_strategi.Kd_Bidang", "ASC");
         $this->db->order_by($this->table.".Kd_Prog", "ASC");

@@ -21,10 +21,10 @@ class DataModel extends CI_Model
         foreach($pembobotan as $bobot){
 
             $dataBobot[$no] = $bobot;
-            
             $this->db->where('Kd_Kriteria', $bobot['Kd_Kriteria']);
             $dataBobot[$no]['isi'] = $this->db->get('ref_kecamatan_kriteria_bobot')->result_array();
             $no++;
+            
         }
         return $dataBobot;
     }

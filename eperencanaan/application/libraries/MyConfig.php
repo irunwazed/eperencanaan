@@ -13,6 +13,13 @@ class MyConfig {
         self::$CI->load->library('image_lib');
     }
 
+    public function cekLogin(){
+        $result = false;
+        if(!@self::$CI->session->userdata('id')){
+            // redirect(base_url('logout'));
+        }
+    }
+
 	public function header($angka)
     {
         $domain = array(
