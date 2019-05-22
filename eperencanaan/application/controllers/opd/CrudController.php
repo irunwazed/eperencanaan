@@ -1999,6 +1999,21 @@ class CrudController extends CI_Controller {
                 )
     
             );
+
+            // mengatur variable align center
+            $styleHorizontal = array(
+                'alignment' => array(
+                    'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+                )
+            );
+            $styleVertical = array(
+                'alignment' => array(
+                    'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+                )
+            );
+            // end mengatur variable align center
+
+            $cells = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
     
             $column = 0;
             $row = 1;
@@ -2052,6 +2067,135 @@ class CrudController extends CI_Controller {
                     $object->getActiveSheet()->setCellValueByColumnAndRow(22, $excel_row, $row['Nm_Sub_Unit']);
                 }
                 $excel_row++;
+            }
+
+            // memberi border Atas
+            $borderArray = array(
+                'borders' => array(
+                    'allborders' => array(
+                        'style' => PHPExcel_Style_Border::BORDER_THIN
+                    )
+                )
+            );
+
+            $object->getActiveSheet()->getStyle("A1:A3")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("B1:B3")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("C1:C3")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("D1:D3")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("E1:E3")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("F1:F3")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("G1:H1")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("I1:I3")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("J1:U1")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("V1:V3")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("W1:W3")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("G2:G3")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("H2:H3")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("J2:K2")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("L2:M2")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("N2:O2")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("P2:Q2")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("R2:S2")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("T2:U2")->applyFromArray($borderArray);
+
+            $object->getActiveSheet()->getStyle("D1")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("D2")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("D3")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("A18")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("B18")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("C18")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("C28")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("D28")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("E28")->applyFromArray($borderArray);
+            // end memberi border Atas
+
+            // merge cell
+            $object->getActiveSheet()->mergeCells("A1:C1");
+            $object->getActiveSheet()->mergeCells("A2:C2");
+            $object->getActiveSheet()->mergeCells("A3:C3");
+            $object->getActiveSheet()->mergeCells("A17:C17");
+            $object->getActiveSheet()->mergeCells("A23:C23");
+            $object->getActiveSheet()->mergeCells("A27:A28");
+            $object->getActiveSheet()->mergeCells("B27:B28");
+            $object->getActiveSheet()->mergeCells("C27:E27");
+            $object->getActiveSheet()->mergeCells("F27:F28");
+            // end merge cell    
+
+             // memberi border Bawah
+             $borderArray = array(
+                'borders' => array(
+                    'allborders' => array(
+                        'style' => PHPExcel_Style_Border::BORDER_THIN
+                    )
+                )
+            );
+
+            $object->getActiveSheet()->getStyle("A4:D13")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("A19:C23")->applyFromArray($borderArray);
+            $object->getActiveSheet()->getStyle("A29:F36")->applyFromArray($borderArray);
+            // end memberi border Bawah
+
+            $columnCell = 0;
+            while($columnCell <= ($column-1)){
+                $dataCell = 0;
+                while($dataCell <= ($excel_row-1)){
+                    // memberi border bawah
+                    // $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->applyFromArray(
+                    // array(
+                    //     'borders' => array(
+                    //         'allborders' => array(
+                    //             'style' => PHPExcel_Style_Border::BORDER_THIN
+                    //             )
+                    //     )
+                    // )
+                    // );
+                    // end memberi border bawah
+
+                    // menset align center
+                    // $object->getActiveSheet()->getStyle("A".$dataCell)->applyFromArray($styleHorizontal);
+                    $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->applyFromArray($styleVertical);
+                    // end menset align center
+
+                    // Text wrapping
+                    $object->getActiveSheet()->getStyle($cells[$columnCell]."".$dataCell)->getAlignment()->setWrapText(true);
+                    // end text wrapping
+
+                    $dataCell++;
+                }
+
+                // mengatur auto menyesuaikan lebar
+                $object->getActiveSheet()->getColumnDimension($cells[$columnCell])->setAutoSize(true);
+                // $object->getActiveSheet()->getColumnDimension("A")->setWidth(10);
+                // end auto menyesuaikan lebar
+
+                // menebalkan font
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."1")->getFont()->setBold(true);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."2")->getFont()->setBold(true);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."3")->getFont()->setBold(true);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."17")->getFont()->setBold(true);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."18")->getFont()->setBold(true);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."27")->getFont()->setBold(true);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."28")->getFont()->setBold(true);
+                // end menebalkan font
+
+                // menset align center
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."1")->applyFromArray($styleHorizontal);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."1")->applyFromArray($styleVertical);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."2")->applyFromArray($styleHorizontal);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."2")->applyFromArray($styleVertical);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."3")->applyFromArray($styleHorizontal);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."3")->applyFromArray($styleVertical);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."17")->applyFromArray($styleHorizontal);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."17")->applyFromArray($styleVertical);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."18")->applyFromArray($styleHorizontal);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."18")->applyFromArray($styleVertical);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."27")->applyFromArray($styleHorizontal);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."27")->applyFromArray($styleVertical);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."28")->applyFromArray($styleHorizontal);
+                $object->getActiveSheet()->getStyle($cells[$columnCell]."28")->applyFromArray($styleVertical);
+                // end menset align center
+
+                $columnCell++;
             }
         }
         

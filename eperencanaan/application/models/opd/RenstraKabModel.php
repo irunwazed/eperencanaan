@@ -153,7 +153,6 @@ class RenstraKabModel extends CI_Model
         return $result;
     }
 
-
     public function cekInput($post){
         // return 1;
         if(@$post['name'] == 'opd'){
